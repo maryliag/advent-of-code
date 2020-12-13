@@ -19,7 +19,6 @@ async function getResult(): Promise<number> {
                     }
                 }
             }
-
         })
         .on('close', function (err) {
             total += letters.length;

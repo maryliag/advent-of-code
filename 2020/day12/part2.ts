@@ -10,7 +10,8 @@ async function getResult(): Promise<number> {
         var directionsLeft: string[] = ['E', 'N', 'W', 'S'];
         var positions: object = {'E': 0, 'W': 0, 'N': 0, 'S': 0};
         var waypoint: object = {'E': 10, 'W': 0, 'N': 1, 'S': 0};
-        var inst, aux: string;
+        var inst: string;
+        var aux: string;
         var qtd: number;
         var d: string[];
         var pos: object;

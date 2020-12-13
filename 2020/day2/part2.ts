@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as rd from 'readline'
 
 var reader = rd.createInterface(fs.createReadStream("./input.txt"));
-var values:number[] = [];
 
 class Pwd {
     pos1: number;
@@ -24,10 +23,9 @@ function isValid(pwd: string, rules: Pwd) {
 
 function getResult() {
     var validPwd = 0;
-    var pwdRules;
+    var pwdRules: Pwd;
     reader.on("line", (l: string) => {
         let info = l.split(' ');
-        
         pwdRules = new Pwd(info[0], info[1]);
         
         if (isValid(info[2], pwdRules)) validPwd++;

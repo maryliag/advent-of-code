@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as rd from 'readline'
 
 var reader = rd.createInterface(fs.createReadStream("./input.txt"));
-var values:number[] = [];
 
 function getResult() {
     var position: number = 0;
