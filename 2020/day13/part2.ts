@@ -5,7 +5,10 @@ async function getResult(): Promise<number> {
     var reader = rd.createInterface(fs.createReadStream("./input.txt"));
     var busesInfo: string[];
     var buses: object[];
+    var busesChecked: number[] = [];
     var line: number = 0;
+    const gcd = (a: number, b: number) => a ? gcd(b % a, a) : b;
+    const lcm = (a: number, b: number) => a * b / gcd(a, b);
 
     return new Promise<number>(resolve => {
         reader.on("line", (l: string) => {
@@ -19,6 +22,7 @@ async function getResult(): Promise<number> {
 
             var firstBusTs: number = 0;
             var period: number = buses[0]['id'];
+            busesChecked.push(buses[0]['id']);
             var bus: object;
             for (let j = 1; j < buses.length; j++) {
                 bus = buses[j];
@@ -27,10 +31,10 @@ async function getResult(): Promise<number> {
                 while ((firstBusTs + bus['diff']) % bus['id'] != 0) {
                     firstBusTs += period;
                 }
-                // The period starts as the id of first bus, but keeps incrementing to consider the other buses we have looked into so far, 
-                // since they all need to be aligned when looking into the next bus. 
-                // This way we don't look for values not possible
-                period *= bus['id'];
+                // The period starts as the id of first bus, but keeps been updated by the Least Common Multiple of all checked buses' ids 
+                // to consider all buses we have looked into so far, so they keep aligned when looking into the next bus. 
+                busesChecked.push(bus['id']);
+                period = busesChecked.reduce(lcm);
             }
             resolve(firstBusTs);
 
