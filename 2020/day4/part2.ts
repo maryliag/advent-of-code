@@ -9,6 +9,7 @@ async function getResult(): Promise<number> {
         var doc = new Document();
         var info: string[];
         reader.on("line", (l: string) => {
+            // If line is empty, a document just ended, so create the new Document and check if is valid
             if (l.length == 0) {             
                 if (doc.isValid()) countValid++;
                 doc = new Document();
@@ -20,6 +21,7 @@ async function getResult(): Promise<number> {
             }
         })
         .on('close', function (err) {
+            // After file finishes there is the last Document to check
             if (doc.isValid()) countValid++;
             resolve(countValid)
         })

@@ -12,10 +12,10 @@ async function getResult(): Promise<number> {
         })
         .on('close', function (err) {
             adapters.sort(function(a, b){return a-b})
-            adapters.push(adapters[adapters.length - 1] + 3);
+            adapters.push(adapters[adapters.length - 1] + 3); // Add the device adapter, which is equal to the biggest adapter value + 3
             var prev: number = 0;
 
-            for (let i = 0; i < adapters.length; i++) {
+            for (let i = 0; i < adapters.length; i++) { // Update the joltDiff adding the difference of the new adapter
                 joltDiff[adapters[i] - prev]++; 
                 prev = adapters[i];
             }

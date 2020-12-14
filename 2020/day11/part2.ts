@@ -10,22 +10,23 @@ async function getResult(): Promise<number> {
             map.push(l.split(''));
         })
         .on('close', function (err) {
-            var occupied: number = countOccupied(map);
+            var before: string = map.toString();
             applyRules(map);
-            var occupiedUpdated: number = countOccupied(map);
+            var after: string = map.toString();
 
-            while (occupiedUpdated != occupied) {
-                occupied = occupiedUpdated;
+            // Keep applying rules until there is no changing on the seating area
+            while (after != before) {
+                before = after;
                 applyRules(map);
-
-                occupiedUpdated = countOccupied(map);
+                after = map.toString();
             }
             
-            resolve(occupied);
+            resolve(countOccupied(map));
         })
     }); 
 };
 
+// Count total of occupied seats on the seating area
 function countOccupied(map:string[][]) {
     var occupied: number = 0;
     for (let i = 0; i < map.length; i++) {
@@ -36,6 +37,9 @@ function countOccupied(map:string[][]) {
     return occupied;
 }
 
+// Apply all rules simultaneously
+// Create a pending state for seats to be occupied that are current free (O) and for seat current occupied that will be empty (E)
+// This is done so no changes in one seat alters the value for the next without the next being calculated
 function applyRules(map:string[][]) {
     for (let i = 0; i < map.length; i++) {
         for (let j = 0; j < map[i].length; j++) {
@@ -56,117 +60,58 @@ function applyRules(map:string[][]) {
     }
 }
 
-function countAdjacents(map:string[][], row, column) {
+// Check if is occupied or on the pending state that will be empty (meaning currently still occupied)
+function foundOccupied(map:string[][], row: number, column: number) {
+    return map[row][column] === '#' || map[row][column] === 'E';
+}
+
+// Check if is empty or on the pending state that will be occupied (meaning currently still empty)
+function foundEmpty(map:string[][], row: number, column: number) {
+    return map[row][column] === 'L' || map[row][column] === 'O';
+}
+
+// Return true if the first seats it finds is occupied
+function isFirstSeatOccupied(map:string[][], rowStart: number, columnStart: number, rowAdd: number, columnAdd: number) {
+    // Keep moving until is no longer a valid seat (not on the seating area) or found a seat
+    while (rowStart >= 0 && columnStart >= 0 && rowStart < map.length && columnStart < map[0].length) {
+        if (foundOccupied(map, rowStart, columnStart)) {
+            return true;
+        } else if (foundEmpty(map, rowStart, columnStart)) {
+            return false;
+        }
+        rowStart += rowAdd;
+        columnStart += columnAdd;
+    }
+
+    return false;
+}
+
+function countAdjacents(map:string[][], row: number, column: number) {
     var adj: number = 0;
-    var rowsSize: number = map.length;
-    var columnsSize: number = map[0].length;
-    var rowAux: number = row;
-    var columnAux: number = column;
     
     // Check same line left
-    columnAux = column - 1;
-    while (columnAux >= 0) {
-        if (map[rowAux][columnAux] === '#' || map[rowAux][columnAux] === 'E') {
-            adj++;
-            columnAux = -1;
-        } else if (map[rowAux][columnAux] === 'L' || map[rowAux][columnAux] === 'O') {
-            columnAux = -1;
-        }
-        columnAux--;
-    }
+    if (isFirstSeatOccupied(map, row, column - 1, 0, -1)) adj++;
 
     // Check same line right
-    columnAux = column + 1;
-    while (columnAux < columnsSize) {
-        if (map[rowAux][columnAux] === '#' || map[rowAux][columnAux]  === 'E') {
-            adj++;
-            columnAux = columnsSize;
-        } else if (map[rowAux][columnAux] === 'L' || map[rowAux][columnAux] === 'O') {
-            columnAux = columnsSize;
-        }
-        columnAux++;
-    }
+    if (isFirstSeatOccupied(map, row, column + 1, 0, 1)) adj++;
 
     // Check same column up
-    columnAux = column;
-    rowAux = row - 1;
-    while (rowAux >= 0) {
-        if (map[rowAux][columnAux] === '#' || map[rowAux][columnAux]  === 'E') {
-            adj++;
-            rowAux = -1;
-        } else if (map[rowAux][columnAux] === 'L' || map[rowAux][columnAux] === 'O') {
-            rowAux = -1;
-        }
-        rowAux--;
-    }
+    if (isFirstSeatOccupied(map, row - 1, column, -1, 0)) adj++;
 
     // Check same column down
-    rowAux = row + 1;
-    while (rowAux < rowsSize) {
-        if (map[rowAux][columnAux] === '#' || map[rowAux][columnAux]  === 'E') {
-            adj++;
-            rowAux = rowsSize;
-        } else if (map[rowAux][columnAux] === 'L' || map[rowAux][columnAux] === 'O') {
-            rowAux = rowsSize;
-        }
-        rowAux++;
-    }
+    if (isFirstSeatOccupied(map, row + 1, column, 1, 0)) adj++;
 
     // Check diagonal left up
-    columnAux = column - 1;
-    rowAux = row - 1;
-    while (rowAux >= 0 && columnAux >= 0) {
-        if (map[rowAux][columnAux] === '#' || map[rowAux][columnAux]  === 'E') {
-            adj++;
-            rowAux = -1;
-        } else if (map[rowAux][columnAux] === 'L' || map[rowAux][columnAux] === 'O') {
-            rowAux = -1;
-        }
-        rowAux--;
-        columnAux--;
-    }
+    if (isFirstSeatOccupied(map, row - 1, column - 1, -1, -1)) adj++;
 
     // Check diagonal right up
-    columnAux = column + 1;
-    rowAux = row - 1;
-    while (rowAux >= 0 && columnAux < columnsSize) {
-        if (map[rowAux][columnAux] === '#' || map[rowAux][columnAux]  === 'E') {
-            adj++;
-            rowAux = -1;
-        } else if (map[rowAux][columnAux] === 'L' || map[rowAux][columnAux] === 'O') {
-            rowAux = -1;
-        }
-        rowAux--;
-        columnAux++;
-    }
+    if (isFirstSeatOccupied(map, row - 1, column + 1, -1, 1)) adj++;
 
     // Check diagonal right down
-    columnAux = column + 1;
-    rowAux = row + 1;
-    while (rowAux < rowsSize && columnAux < columnsSize) {
-        if (map[rowAux][columnAux] === '#' || map[rowAux][columnAux]  === 'E') {
-            adj++;
-            rowAux = rowsSize;
-        } else if (map[rowAux][columnAux] === 'L' || map[rowAux][columnAux] === 'O') {
-            rowAux = rowsSize;
-        }
-        rowAux++;
-        columnAux++;
-    }
+    if (isFirstSeatOccupied(map, row + 1, column + 1, 1, 1)) adj++;
 
     // Check diagonal left down
-    columnAux = column - 1;
-    rowAux = row + 1;
-    while (rowAux < rowsSize && columnAux >= 0) {
-        if (map[rowAux][columnAux] === '#' || map[rowAux][columnAux]  === 'E') {
-            adj++;
-            rowAux = rowsSize;
-        } else if (map[rowAux][columnAux] === 'L' || map[rowAux][columnAux] === 'O') {
-            rowAux = rowsSize;
-        }
-        rowAux++;
-        columnAux--;
-    }
+    if (isFirstSeatOccupied(map, row + 1, column - 1, 1, -1)) adj++;
 
     return adj;
 }

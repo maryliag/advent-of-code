@@ -13,8 +13,9 @@ async function getResult(): Promise<number> {
             var acc: number = 0;
             var index: number = 0;
 
+            // Runs until it finds a instruction that has been run previously
             while (!instructions[index]['ran']) {
-                instructions[index]['ran'] = true;
+                instructions[index]['ran'] = true; // Update the value of the isntruction to show it has been run
                 if (instructions[index]['op'] === 'acc') {
                     acc += instructions[index]['val'];
                     index++;

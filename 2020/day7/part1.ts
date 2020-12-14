@@ -15,6 +15,7 @@ async function getResult(): Promise<number> {
         .on('close', function (err) {
             var keys: string[] = Object.keys(allBags);
             for (let i = 0; i < keys.length; i++) {
+                // Look all bags if they can carry direct or indirectly a shiny gold bag 
                 if (canCarry('shiny gold', allBags[keys[i]], allBags)) countPossible++;
             }
             resolve(countPossible);
@@ -32,6 +33,7 @@ class Bag {
     contain: object[];
     possible: boolean;
 
+    // Create a Bag with the name and the list of all contaning bags in it with their quantity
     constructor (info: string) {
         this.name = info.split(' bag')[0];
         this.contain = [];
@@ -48,20 +50,25 @@ class Bag {
 }
 
 function canCarry(type: string, bag: Bag, allBags: object) {
+    // If the ban doesn't contain any other, return false
     if (bag.contain.length == 0) {
         allBags[bag.name].possible = false;
         return false;
     }
+    // Looking all bag contained on the parent bag
     for (let i = 0; i < bag.contain.length; i++) {
+        // If we already know that the looked bag can possibly carry the looked bag, set the parent bag and return true
         if (bag.possible) {
             allBags[bag.name].possible = true;
             return true
         }
+        // If the type of the looked bag is the type we're looking, set the parent bag and return true
         if (bag.contain[i]['type'] === type) {
             allBags[bag.name].possible = true;
             return true;
         }
         
+        // Look for the the bags contained on the looked bag if they can carry the bag we're looking
         if (bag.possible === undefined) {
             if (canCarry(type, allBags[bag.contain[i]['type']], allBags)) {
                 allBags[bag.name].possible = true;

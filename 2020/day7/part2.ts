@@ -27,6 +27,7 @@ class Bag {
     name: string;
     contain: object[];
 
+    // Create a Bag with the name and the list of all contaning bags in it with their quantity
     constructor (info: string) {
         this.name = info.split(' bag')[0];
         this.contain = [];
@@ -45,6 +46,7 @@ class Bag {
 function countInsideBags(type: string, bag: Bag, allBags: object) {
     var count: number = 0;
     for (let i = 0; i < bag.contain.length; i++) {
+        // Each bag can carry their containing bags plus the containing bags * their own containing bags
         count += bag.contain[i]['qtd'] + bag.contain[i]['qtd'] * countInsideBags(type, allBags[bag.contain[i]['type']], allBags);
     }
 

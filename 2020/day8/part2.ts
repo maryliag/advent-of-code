@@ -12,6 +12,8 @@ async function getResult(): Promise<number> {
         .on('close', function (err) {
             var result: object;
 
+            // For each instruction, if is `nop` or `jmp` switch its value, and check if the program is valid. 
+            // If it finds a loop, switch the instruction back and move to the next element of the instructions array
             for (let i = 0; i < instructions.length; i++) {
                 if (instructions[i]['op'] === 'nop' || instructions[i]['op'] === 'jmp') {
                     switchValue(i, instructions);
@@ -37,6 +39,7 @@ function switchValue (index, instructions) {
     }
 }
 
+// Return an object {loop: boolean, acc: number} with the result if it found a loop and the value of the accumulator when it stopped executing
 function containLoop(inst) {
     var result: object = {loop: false, acc: 0};
     var index: number = 0;
@@ -46,6 +49,7 @@ function containLoop(inst) {
         inst[i]['ran'] = false;
     }
 
+    // Runs the program until it finds a loop or there isn't more isntructions to execute
     while (index < inst.length && !inst[index]['ran']) {
         inst[index]['ran'] = true;
         if (inst[index]['op'] === 'acc') {

@@ -17,12 +17,16 @@ async function getResult(): Promise<number> {
             allIds.sort();
             
             for (let i = 0; i < (allIds.length - 1); i++) {
+                // If the next element is jumping 2 numbers, it found the missing id
                 if (allIds[i + 1] === allIds[i] + 2) resolve(allIds[i] + 1);
             }
         })
     }); 
 };
 
+// Get the value from the Binary Space Partitioning. 
+// If F or L get the lower half
+// If B or R get the upper half
 function getValue(bsp: string, min: number, max: number) {
     var mid: number = 0;
     for (let i = 0; i < bsp.length; i++) {

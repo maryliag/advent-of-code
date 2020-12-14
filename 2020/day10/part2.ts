@@ -15,6 +15,7 @@ async function getResult(): Promise<number> {
     }); 
 };
 
+// Each adapter total combinations is the sum of all possible combinations that can be done to it
 function possibleCombinations(adapters: number[]) {
     var combinations: number = 0;
     var adaptersResults: object = {};
@@ -22,6 +23,8 @@ function possibleCombinations(adapters: number[]) {
     adapters.push(adapters[adapters.length - 1] + 3);
     adaptersResults[adapters[adapters.length - 1]] = 1;
 
+    // Starting with the last adapter, the base case that has only one possible combnation
+    // Keep moving to the previous adapter and updating it's value on adaptersResults so it can be used if needed without calculation again
     for (let i = adapters.length - 2; i >= 0; i--) {
         combinations = 0;
         for (let j = 1; j < 4; j++) {

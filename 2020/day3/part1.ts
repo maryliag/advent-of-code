@@ -8,6 +8,8 @@ function getResult() {
     var first: boolean = true;
     var treesCount = 0;
     reader.on("line", (l: string) => {
+        // If is the first line of the file, just move 3 positions to the right, for all others check the value and then move
+        // The pattern repeats, so move the rest of the division of the move by the length of the row
         if (first) {
             position = ((position + 3) % (l.length));
             first = false;

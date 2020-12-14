@@ -11,9 +11,9 @@ async function getResult(): Promise<number> {
 
     return new Promise<number>(resolve => {
         reader.on("line", (l: string) => {
-            if (line === 0) {
+            if (line === 0) { // The first line has the timestamp we want
                 start = Number(l);
-            } else {
+            } else { // The second line is the list of all buses' ids
                 busesInfo = l.split(',');
             }
             line++;
@@ -26,6 +26,7 @@ async function getResult(): Promise<number> {
     }); 
 };
 
+// Only add valid buses (id != x)
 function cleanUpBuses(busesComplete:string[]) {
     var buses: object[] = [];
     for (let i = 0; i < busesComplete.length; i++) {
@@ -36,10 +37,13 @@ function cleanUpBuses(busesComplete:string[]) {
     return buses;
 }
 
+// Given a timestamp, return the first bus that shows up after that 
 function smallestTs(ts:number, buses: object[]) {
     var smallest: number = buses[0]['id'] * (Math.floor(ts / buses[0]['id']) + 1);
     var bus: object = buses[0];
 
+    // For each bus, calculate the first timestamp it will show up after the given ts
+    // Keep updating the smallest to have smallest it has been found until that point
     for (let i = 0; i < buses.length; i++) {
         buses[i]['earliest'] = buses[i]['id'] * (Math.floor(ts / buses[i]['id']) + 1);
         if (buses[i]['earliest'] < smallest) {

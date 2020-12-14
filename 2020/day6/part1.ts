@@ -9,11 +9,13 @@ async function getResult(): Promise<number> {
     return new Promise<number>(resolve => {
         letters = [];
         reader.on("line", (l: string) => {
+            // If empty line, that grouped ended, so add the count of different questions to the total
             if (l.length === 0) {
                 total += letters.length;
                 letters = [];
             } else {
                 for (let i = 0; i < l.length; i++) {
+                    // Add question to a list if not yet there
                     if (letters.indexOf(l.charAt(i)) < 0) {
                         letters.push(l.charAt(i));
                     }
@@ -21,6 +23,7 @@ async function getResult(): Promise<number> {
             }
         })
         .on('close', function (err) {
+            // Add the count of letters of the last group to the total
             total += letters.length;
             resolve(total);
         })

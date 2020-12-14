@@ -9,7 +9,7 @@ async function getResult(): Promise<number> {
 
     return new Promise<number>(resolve => {
         reader.on("line", (l: string) => {
-            if (line === 1) {
+            if (line === 1) { // We only care about line with, with all the buses' ids
                 busesInfo = l.split(',');
             }
             line++;
@@ -22,9 +22,14 @@ async function getResult(): Promise<number> {
             var bus: object;
             for (let j = 1; j < buses.length; j++) {
                 bus = buses[j];
+                // Look for the timestamp of the first bus where the ts of the first bus plus the diff from the bus we're current looking into 
+                // is a multiple of the bus we're current looking into
                 while ((firstBusTs + bus['diff']) % bus['id'] != 0) {
                     firstBusTs += period;
                 }
+                // The period starts as the id of first bus, but keeps incrementing to consider the other buses we have looked into so far, 
+                // since they all need to be aligned when looking into the next bus. 
+                // This way we don't look for values not possible
                 period *= bus['id'];
             }
             resolve(firstBusTs);
@@ -33,6 +38,7 @@ async function getResult(): Promise<number> {
     }); 
 };
 
+// Only add valid buses (id != x) and save the diff we want compared to the first bus
 function cleanUpBuses(busesComplete: string[]) {
     var buses: object[] = [];
     for (let i = 0; i < busesComplete.length; i++) {

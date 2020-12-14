@@ -10,19 +10,21 @@ async function getResult(): Promise<number> {
 
     return new Promise<number>(resolve => {
         reader.on("line", (l: string) => {
+            // Add numbers until it finds the weakness
             numbers.push(Number(l));
             weakness = findWeakness(invalidNumber, numbers);
-
             if (weakness > 0) resolve(weakness);
         })
     }); 
 };
 
-function findWeakness(invalidNumber, numbers) {
+function findWeakness(invalidNumber: number, numbers: number[]) {
     var total: number;
     var index: number;
     var adding: number[];
 
+    // For each element, keep adding the following ones until find the exact or higher value compared to the number we're checking 
+    // or there are no more numbers to add
     for (let i = 0; i < numbers.length; i++) {
         total = 0;
         adding = [];
@@ -33,10 +35,11 @@ function findWeakness(invalidNumber, numbers) {
             total += numbers[index];
             index++;
         }
-        if (total == invalidNumber) {
+        if (total == invalidNumber) { // If the sum was the exact value return the sum of the smallest and largest number
             adding.sort();
             return adding[0] + adding[adding.length - 1];
         }
+        // If the sum was greater or smaller then the value, go to the next element of the array
     }
     return 0;
 
