@@ -21,18 +21,21 @@ async function getResult(): Promise<number> {
             buses = cleanUpBuses(busesInfo);
 
             var firstBusTs: number = 0;
+            // The period starts as the id of the first bus 
+            // and we use that to increment the firstBusTs until we find a ts where the ts + diff is multiple of the second bus
             var period: number = buses[0]['id'];
             busesChecked.push(buses[0]['id']);
             var bus: object;
             for (let j = 1; j < buses.length; j++) {
                 bus = buses[j];
                 // Look for the timestamp of the first bus where the ts of the first bus plus the diff from the bus we're current looking into 
-                // is a multiple of the bus we're current looking into
+                // is a multiple of the bus we're looking into
                 while ((firstBusTs + bus['diff']) % bus['id'] != 0) {
                     firstBusTs += period;
                 }
-                // The period starts as the id of first bus, but keeps been updated by the Least Common Multiple of all checked buses' ids 
-                // to consider all buses we have looked into so far, so they keep aligned when looking into the next bus. 
+                // Once we find the value, we know this alignment will repeat every X period, with X being the Least Common Multiple of the 
+                // buses ids of the alignment
+                // Since we want to keep this alignment, we keep updating the period value to include the last checked bus into the LCM calculation
                 busesChecked.push(bus['id']);
                 period = busesChecked.reduce(lcm);
             }
