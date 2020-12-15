@@ -5,30 +5,32 @@ async function getResult(): Promise<number> {
     var reader = rd.createInterface(fs.createReadStream("./input.txt"));
     var mem: number[] = [];
     var mask: string;
+    var sum: number = 0;
 
     return new Promise<number>(resolve => {
         reader.on("line", (l: string) => {
             if (l.split(' = ')[0] === 'mask') { // If value is a mask, updates its value, otherwise insert new masked value to memory
                 mask = l.split(' = ')[1];
             } else {
-                insertToMemory(l, mem, mask);
+                sum = insertToMemory(l, mem, mask, sum);
             }
         })
         .on('close', function (err) {
-            var sum:number = 0;
-            for (let i = 0; i < mem.length; i++) {
-                if (mem[i]) {
-                    sum += mem[i];
-                }
-            }
             resolve(sum);
         })
     }); 
 };
 
-function insertToMemory(line: string, mem: number[], mask: string) {
+function insertToMemory(line: string, mem: number[], mask: string, sum: number) {
     var pos: number = Number(line.split('] = ')[0].replace('mem[', ''));
+    // Since we're trying to find the sum of all values, save this to a variable
+    // Whenever the memory has a previous value, remove from the sum and add the new one, otherwise just adds the new value
+    if (mem[pos]) {
+        sum -= mem[pos];
+    }
     mem[pos] = maskedNumber(Number(line.split(' = ')[1]), mask);
+    sum += mem[pos];
+    return sum;
 }
 
 function maskedNumber(value:number, mask: string) {
