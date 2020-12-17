@@ -12,7 +12,7 @@ async function getResult(): Promise<number> {
 
     return new Promise<number>(resolve => {
         reader.on("line", (l: string) => {
-            if (line === 1) { // We only care about line with, with all the buses' ids
+            if (line === 1) { // We only care about line one, with all the buses' ids
                 busesInfo = l.split(',');
             }
             line++;

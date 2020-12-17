@@ -87,7 +87,7 @@ function calculateFields(tickets: string[][], rules: Rules[]) {
     var fields: string[][] = [];
     var isValid: boolean;
 
-    // Check for each i-number in all tickets follow the same rule
+    // Check for each i-number (same column) in all tickets follow the same rule
     for (let i = 0; i < tickets[0].length; i++) {
         fields.push([]);
         for (let j = 0; j < rules.length; j++) {
