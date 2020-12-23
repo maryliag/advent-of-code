@@ -66,7 +66,7 @@ function removeIngredient(allergens: object, ingredient: string, notRemove: stri
     }
 }
 
-// Generate list of ingredients order alphabetically by their allergen
+// Generate list of ingredients ordered alphabetically by their allergen
 function generateCanonicalDangerous(allergens: object) {
     let keys: string[] = Object.keys(allergens).sort();
     var s: string = allergens[keys[0]];

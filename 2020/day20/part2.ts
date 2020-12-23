@@ -112,7 +112,7 @@ function createMap(allTiles: object) {
     var lastAddedColumn: Tile = firstTile;
     var newTile: Tile = allTiles[firstTile.matches[1][0]];
     // Add a tile on a new row, then add all other tiles to that row until no longer has a tile to add
-    // Keep adding new rows until no more tile to add at the bottom
+    // Keep adding new rows until no more tiles to add at the bottom
     while (hasBelow || completingRow) {
         hasRight = true;
         while (hasRight) {
@@ -269,7 +269,7 @@ function countMonsters(map: string[][]) {
     const maskHeight: number = monsterMask.length;
     const maskWidth: number = monsterMask[0].length;
 
-    // For each 8 possible positions of the map, check until you find a monster on one of them
+    // For each 8 possible positions of the map, check until you find at least one monster on one of them
     for (let i = 0; i < 8; i++) {
         if (i === 4) map = flipMap(map, 'VERTICAL');
         map = rotateMap(map, i % 4);
@@ -287,7 +287,7 @@ function countMonsters(map: string[][]) {
     return monstersCount;
 }
 
-// If the map contain # where on all posotions where mask has M, it was a match
+// If the map contain # on all positions where the mask has M, it was a match
 function matchMask(map: string[][], mask: string[][], row: number, column: number) {
     for (let i = 0; i < mask.length; i++) {
         for (let j = 0; j < mask[i].length; j++) {
