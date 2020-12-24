@@ -22,7 +22,7 @@ async function getResult(): Promise<number> {
     }); 
 };
 
-// the x,y of an hexagon are considered to tip of it, so the one on east will be x+2 will the one on the ne/se will be x+1
+// the x,y of an hexagon are considered the top tip of it, so the one on east will be x+2 while the one on the ne/se will be x+1
 function generateInstructions(info:string) {
     info = info.split('se').join(',x1&y-1');
     info = info.split('sw').join(',x-1&y-1');
