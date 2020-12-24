@@ -1,27 +1,4 @@
-import * as fs from 'fs';
-import * as rd from 'readline';
-
-class Cup {
-    id: number;
-    next: number;
-
-    constructor(id: number) {
-        this.id = id;
-    }
-}
-
-// Return the multiplication of the next two cups after the starting cup
-function getNext2Cups(starting: number, cups: object) {
-    var cup1: number = cups[starting].next;
-    var cup2: number = cups[cup1].next;
-
-    console.log('Cup 1: ', cup1);
-    console.log('Cup 2: ', cup2);
-
-    return cup1 * cup2;
-}
-
-function solveChallenge() {
+function solveChallenge2() {
     var min: number = 1;
     var max: number = 9;
     var input: string[] = '487912365'.split('');
@@ -31,31 +8,30 @@ function solveChallenge() {
         input.push(i.toString());
     }
     max = 1000000;
-    var cups: object = {};
+    var cups: object = {}; // Object with the key as the cup number and the value the next cup
     let first: number;
     let prev: number = null;
     // Add the new cup to the object, with its next value
     for (let i = 0; i < input.length; i++) {
-        let cup: Cup = new Cup(Number(input[i]));
+        let cup: number = Number(input[i]);
         if (i === 0) { 
-            first = cup.id;
-            min = cup.id;
-            max = cup.id;
+            first = cup;
+            min = cup;
+            max = cup;
         } else {
-            cups[prev].next = cup.id;
-            if (cup.id < min) {
-                min = cup.id;
+            cups[prev] = cup;
+            if (cup < min) {
+                min = cup;
             }
-            if (cup.id > max) {
-                max = cup.id;
+            if (cup > max) {
+                max = cup;
             }
         }
 
         if (i === input.length - 1) {
-            cup.next = first;
+            cups[cup] = first;
         }
-        prev = cup.id;
-        cups[input[i]] = cup;
+        prev = cup;
     }
     var moves: number = 1;
     var current: number = first;
@@ -67,8 +43,8 @@ function solveChallenge() {
         picked = [];
         let aux: number = current;
         for (let i = 0; i < 3; i++) {
-            picked.push(cups[aux].next);
-            aux = cups[aux].next;
+            picked.push(cups[aux]);
+            aux = cups[aux];
         }
 
         let lookingDestination: boolean = true;
@@ -83,16 +59,27 @@ function solveChallenge() {
         
         // Add the picked values right next to the destination cup
         // Update all values of `next` accordingly
-        let nextAux: number = cups[destination].next;
-        cups[current].next = cups[picked[2]].next;
-        cups[destination].next = picked[0];
-        cups[picked[2]].next = nextAux;
+        let nextAux: number = cups[destination];
+        cups[current] = cups[picked[2]];
+        cups[destination] = picked[0];
+        cups[picked[2]] = nextAux;
         
-        current = cups[current].next;
+        current = cups[current];
         moves++;
     }
 
     console.log("Result: ", getNext2Cups(1, cups));
 }
 
-solveChallenge();
+// Return the multiplication of the next two cups after the starting cup
+function getNext2Cups(starting: number, cups: object) {
+    var cup1: number = cups[starting];
+    var cup2: number = cups[cup1];
+
+    console.log('Cup 1: ', cup1);
+    console.log('Cup 2: ', cup2);
+
+    return cup1 * cup2;
+}
+
+solveChallenge2();
