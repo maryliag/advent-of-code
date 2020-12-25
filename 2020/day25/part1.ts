@@ -23,24 +23,28 @@ async function getResult(): Promise<number> {
 function calculateEncryptionKey(subject: number, card: number, door: number) {
     var loopSize: number = 0;
     var transformed: number = subject;
+    var encryption: object = {card: card, door: door};
 
     // Runs until find the smalles loop between the two public keys
     while (transformed !== card && transformed !== door) {
         transformed *= subject;
         transformed = (transformed % 20201227);
 
+        // Use the loop to calculate the encryption with both punlic keys and return the correct one
+        encryption['card'] *= card;
+        encryption['card'] = (encryption['card'] % 20201227);
+
+        encryption['door'] *= door;
+        encryption['door'] = (encryption['door'] % 20201227);
+
         loopSize++;
     }
-    
-    // Calculate the encryption with the public key you don't know the loop size, using the loop size from the one you know
-    var encryption: number = transformed === card? door : card;
-    subject = transformed === card? door : card;
-    for (let i = 0; i < loopSize; i++) {
-        encryption *= subject;
-        encryption = (encryption % 20201227);
+
+    if (transformed === card) {
+        return encryption['door'];
     }
 
-    return encryption;
+    return encryption['card'];
 }
 
 async function solveChallenge() {
