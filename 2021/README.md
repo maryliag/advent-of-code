@@ -1,15 +1,13 @@
-Advent of code 2021
+# Advent of code 2021
 https://adventofcode.com/2021
 
-Install Go
+### Install Go
 `brew install go`
 
-Build
-`go build partX.go`
+### Run
 
-Run
-`./partX` (using binary)
+#### Without Binary
+`go run partX.go` 
 
-or
-
-`go run partX.go` (with no binary)
+#### With Binary
+`go build partX.go && ./partX`
