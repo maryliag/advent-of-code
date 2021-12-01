@@ -1,11 +1,11 @@
-Advent of code 2020
+# Advent of code 2020
 https://adventofcode.com/2020
 
-Install typescript
+### Install typescript
 `npm install -g typescript`
 
-Compile
+### Compile
 `npx tsc partX.ts`
 
-Run
+### Run
 `node partX.js`
