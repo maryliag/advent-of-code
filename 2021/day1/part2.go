@@ -19,11 +19,12 @@ func getIncreases() int {
 
 	scanner := bufio.NewScanner(f)
 	increases := 0
+	const windowSize = 3
 	// The first value of the array is a completed sum and the value we will
 	// compare against.
 	// The remaining of the array is the sum still being completed for the
 	// following values.
-	sums := []int{0, 0, 0, 0}
+	sums := make([]int, windowSize+1, windowSize+1)
 	count := 0
 
 	for scanner.Scan() {
@@ -33,10 +34,10 @@ func getIncreases() int {
 			os.Exit(2)
 		}
 
-		if count == 3 {
+		if count == windowSize {
 			// When reading a file we will add to all position of the sums array,
 			// except the first (which is a already completed sum).
-			for i := 1; i <= 3; i++ {
+			for i := 1; i <= windowSize; i++ {
 				sums[i] += value
 			}
 
