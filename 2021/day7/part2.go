@@ -47,10 +47,13 @@ func main() {
 		for c := 0; c < len(crabs); c++ {
 			steps := int(math.Abs(float64(crabs[c] - i)))
 			// Using Arithmetic Progression
-			// An = A1 + (n - 1) * d  (d = 1 on this case)
-			lastStepFuel := 1 + (steps - 1)
+			// An = A1 + (n - 1) * d  (with d and A1 = 1 on this case)
+			// An = 1 + (n - 1) * 1
+			// An = n  (with n = steps)
+
 			// Sn = n * (A1 + An)/2
-			totalFuelForCrab := (steps * (1 + lastStepFuel)) / 2
+			// Sn = n * (A1 + n)/2
+			totalFuelForCrab := (steps * (1 + steps)) / 2
 
 			fuel += totalFuelForCrab
 		}
