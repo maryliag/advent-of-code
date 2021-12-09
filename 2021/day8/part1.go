@@ -21,6 +21,10 @@ func getCountUnique() int {
 		values := strings.Split(strings.Split(scanner.Text(), " | ")[1], " ")
 		for i := 0; i < len(values); i++ {
 			l := len(values[i])
+			// 1 have 2 segments
+			// 4 have 4 segments
+			// 7 have 3 segments
+			// 8 have 7 segments
 			if l == 2 || l == 3 || l == 4 || l == 7 {
 				count++
 			}
