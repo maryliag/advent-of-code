@@ -9,9 +9,8 @@ import (
 	"strings"
 )
 
-// Get the position of all dots, the list of instructions
-// and the max value for X and Y.
-func getInfo() (map[string]string, [][]string, int, int) {
+// Get the position of all dots and the list of instructions.
+func getInfo() (map[string]string, [][]string) {
 	f, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -21,8 +20,6 @@ func getInfo() (map[string]string, [][]string, int, int) {
 	transparentPaper := map[string]string{}
 	instructions := [][]string{}
 	readingDots := true
-	maxX := 0
-	maxY := 0
 
 	for scanner.Scan() {
 		value := scanner.Text()
@@ -31,15 +28,6 @@ func getInfo() (map[string]string, [][]string, int, int) {
 				readingDots = false
 			} else {
 				transparentPaper[value] = "#"
-				position := strings.Split(value, ",")
-				x, _ := strconv.Atoi(position[0])
-				y, _ := strconv.Atoi(position[1])
-				if x > maxX {
-					maxX = x
-				}
-				if y > maxY {
-					maxY = y
-				}
 			}
 		} else {
 			instruction := strings.Split(strings.Split(value, "fold along ")[1], "=")
@@ -50,59 +38,69 @@ func getInfo() (map[string]string, [][]string, int, int) {
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-	return transparentPaper, instructions, maxX, maxY
+	return transparentPaper, instructions
 }
 
-// Fold the paper and return the new folded paper and its max X and Y
-func fold(transparentPaper map[string]string, direction string, position string, maxX int, maxY int) (map[string]string, int, int) {
+func newPosition(foldType string, x int, y int, line int) string {
+	positionX := 0
+	positionY := 0
+	// If is folding on X and the position of X is lower then the line,
+	// return the same position.
+	if foldType == "x" {
+		if x < line {
+			return fmt.Sprintf("%d,%d", x, y)
+		}
+		positionX = 1
+	}
+	// If is folding on Y and the position of Y is lower then the line,
+	// return the same position.
+	if foldType == "y" {
+		if y < line {
+			return fmt.Sprintf("%d,%d", x, y)
+		}
+		positionY = 1
+	}
+	// If the fold was on X, the Y value won't change and the X will change
+	// to a new position, which is the current position minus the double of
+	// the difference between the current value and the line.
+	// The process is equivalent when folding Y.
+	newX := x - (2*(x-line))*positionX
+	newY := y - (2*(y-line))*positionY
+	newKey := fmt.Sprintf("%d,%d", newX, newY)
+
+	return newKey
+}
+
+func fold(transparentPaper map[string]string, foldType string, position string) map[string]string {
 	foldedPaper := map[string]string{}
 
 	line, _ := strconv.Atoi(position)
-	limitNotFoldedX := maxX
-	limitNotFoldedY := maxY
-	positionX := 0
-	positionY := 0
-	if direction == "x" {
-		limitNotFoldedX = line - 1
-		positionX = 1
-	}
-	if direction == "y" {
-		limitNotFoldedY = line - 1
-		positionY = 1
-	}
-	// For the part not folded, simply add the places
-	// that have dot to the new folded paper.
-	for x := 0; x <= limitNotFoldedX; x++ {
-		for y := 0; y <= limitNotFoldedY; y++ {
-			key := fmt.Sprintf("%d,%d", x, y)
-			if transparentPaper[key] == "#" {
-				foldedPaper[key] = "#"
-			}
-		}
+
+	for key, _ := range transparentPaper {
+		x, _ := strconv.Atoi(strings.Split(key, ",")[0])
+		y, _ := strconv.Atoi(strings.Split(key, ",")[1])
+		newKey := newPosition(foldType, x, y, line)
+		foldedPaper[newKey] = "#"
 	}
 
-	// For the folded part, find the equivalent position
-	// and add the dot on the folded paper.
-	for x := maxX - limitNotFoldedX; x <= maxX; x++ {
-		for y := maxY - limitNotFoldedY; y <= maxY; y++ {
-			key := fmt.Sprintf("%d,%d", x, y)
-			if transparentPaper[key] == "#" {
-				// If the fold was on X, the Y value won't change
-				// and the X will change to a new position, which is
-				// the double of the difference between the line.
-				// The process is equivalent on a fold on Y.
-				newX := x - (2*(x-line))*positionX
-				newY := y - (2*(y-line))*positionY
-				newKey := fmt.Sprintf("%d,%d", newX, newY)
-				foldedPaper[newKey] = "#"
-			}
-		}
-	}
-
-	return foldedPaper, limitNotFoldedX, limitNotFoldedY
+	return foldedPaper
 }
 
-func printTransparentPaper(transparentPaper map[string]string, maxX int, maxY int) {
+func printTransparentPaper(transparentPaper map[string]string) {
+	maxX := 0
+	maxY := 0
+
+	for key, _ := range transparentPaper {
+		x, _ := strconv.Atoi(strings.Split(key, ",")[0])
+		y, _ := strconv.Atoi(strings.Split(key, ",")[1])
+		if x > maxX {
+			maxX = x
+		}
+		if y > maxY {
+			maxY = y
+		}
+	}
+
 	for y := 0; y <= maxY; y++ {
 		for x := 0; x <= maxX; x++ {
 			key := fmt.Sprintf("%d,%d", x, y)
@@ -117,9 +115,9 @@ func printTransparentPaper(transparentPaper map[string]string, maxX int, maxY in
 }
 
 func main() {
-	transparentPaper, instructions, maxX, maxY := getInfo()
+	transparentPaper, instructions := getInfo()
 	for i := 0; i < len(instructions); i++ {
-		transparentPaper, maxX, maxY = fold(transparentPaper, instructions[i][0], instructions[i][1], maxX, maxY)
+		transparentPaper = fold(transparentPaper, instructions[i][0], instructions[i][1])
 	}
-	printTransparentPaper(transparentPaper, maxX, maxY)
+	printTransparentPaper(transparentPaper)
 }
