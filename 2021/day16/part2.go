@@ -36,7 +36,7 @@ func getInput() string {
 	return input
 }
 
-func sumVersions(t string, remaining string) (int, string) {
+func getValue(t string, remaining string) (int, string) {
 	value := 0
 	values := []int{}
 	typeID, _ := strconv.ParseInt(t, 2, 64)
@@ -60,7 +60,7 @@ func sumVersions(t string, remaining string) (int, string) {
 			remaining = remaining[15:]
 			lengthRead := 0
 			for lengthRead != int(totalLengthInBits) {
-				v, remainingAux := sumVersions(remaining[3:6], remaining[6:])
+				v, remainingAux := getValue(remaining[3:6], remaining[6:])
 				lengthRead += (len(remaining) - len(remainingAux))
 				remaining = remainingAux
 				values = append(values, v)
@@ -70,7 +70,7 @@ func sumVersions(t string, remaining string) (int, string) {
 			remaining = remaining[11:]
 
 			for i := 0; i < int(numberOfSubPackets); i++ {
-				v, remainingAux := sumVersions(remaining[3:6], remaining[6:])
+				v, remainingAux := getValue(remaining[3:6], remaining[6:])
 				remaining = remainingAux
 				values = append(values, int(v))
 			}
@@ -111,7 +111,7 @@ func sumVersions(t string, remaining string) (int, string) {
 
 func main() {
 	input := getInput()
-	value, _ := sumVersions(input[3:6], input[6:])
+	value, _ := getValue(input[3:6], input[6:])
 
 	fmt.Printf("Final Value: %d\n", value)
 }
