@@ -68,68 +68,92 @@ func abs(number int) int {
 	return number
 }
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
-func remove(slice []Box, s Box) []Box {
-	for i := 0; i < len(slice); i++ {
-		if slice[i] == s {
-			return append(slice[:i], slice[i+1:]...)
-		}
-	}
-	return slice
-}
-
+// Check if two boxes intersect.
 func intersect(b1 Box, b2 Box) bool {
-	if ((b1.xMin > b2.xMin && b1.xMin < b2.xMax) || (b1.xMax > b2.xMin && b1.xMax < b2.xMax) || (b2.xMin > b1.xMin && b2.xMin < b1.xMax)) &&
-		((b1.yMin > b2.yMin && b1.yMin < b2.yMax) || (b1.yMax > b2.yMin && b1.yMax < b2.yMax) || (b2.yMin > b1.yMin && b2.yMin < b1.yMax)) &&
-		((b1.zMin > b2.zMin && b1.zMin < b2.zMax) || (b1.zMax > b2.zMin && b1.zMax < b2.zMax) || (b2.zMin > b1.zMin && b2.zMin < b1.zMax)) {
+	if b1.xMax < b2.xMin || b1.xMin > b2.xMax ||
+		b1.yMax < b2.yMin || b1.yMin > b2.yMax ||
+		b1.zMax < b2.zMin || b1.zMin > b2.zMax {
+		return false
+	}
+	return true
+}
+
+// Check if the whole b1 box is inside b2 box.
+func containBox(b1 Box, b2 Box) bool {
+	if b1.xMin >= b2.xMin && b1.xMin <= b2.xMax &&
+		b1.xMax >= b2.xMin && b1.xMax <= b2.xMax &&
+		b1.yMin >= b2.yMin && b1.yMin <= b2.yMax &&
+		b1.yMax >= b2.yMin && b1.yMax <= b2.yMax &&
+		b1.zMin >= b2.zMin && b1.zMin <= b2.zMax &&
+		b1.zMax >= b2.zMin && b1.zMax <= b2.zMax {
 		return true
 	}
 	return false
 }
 
-func generateNewBoxes(b1 Box, b2 Box, action string) []Box {
+// Break down the b Box into smaller boxes that do not intersect with
+// instrucionBox.
+func generateNewBoxes(box Box, instruction Instruction) []Box {
 	boxes := []Box{}
-	b1Boxes := []Box{b1}
-	b2Boxes := []Box{b2}
 
-	for len(b1Boxes) > 0 && len(b2Boxes) > 0 {
-		for i := 0; i < len(b1Boxes); i++ {
-			hasIntersection := false
-			for j := 0; j < len(b2Boxes); j++ {
-				if intersect(b1Boxes[i], b2Boxes[j]) {
-					hasIntersection = true
-					// Break the boxes
-					break
-				}
-			}
-			if !hasIntersection {
-				boxes = append(boxes, b1Boxes[i])
-				b1Boxes = remove(b1Boxes, b1Boxes[i])
-			}
-		}
+	// Cut the extra X
+	if instruction.box.xMin > box.xMin && instruction.box.xMin <= box.xMax {
+		newBox := Box{xMin: box.xMin, xMax: instruction.box.xMin - 1, yMin: box.yMin, yMax: box.yMax, zMin: box.zMin, zMax: box.zMax}
+		boxes = append(boxes, newBox)
+		box.xMin = instruction.box.xMin
 	}
-	boxes = append(boxes, b2Boxes...)
+	if instruction.box.xMax >= box.xMin && instruction.box.xMax < box.xMax {
+		newBox := Box{xMin: instruction.box.xMax + 1, xMax: box.xMax, yMin: box.yMin, yMax: box.yMax, zMin: box.zMin, zMax: box.zMax}
+		boxes = append(boxes, newBox)
+		box.xMax = instruction.box.xMax
+	}
+
+	// Cut the extra Y
+	if instruction.box.yMin > box.yMin && instruction.box.yMin <= box.yMax {
+		newBox := Box{xMin: box.xMin, xMax: box.xMax, yMin: box.yMin, yMax: instruction.box.yMin - 1, zMin: box.zMin, zMax: box.zMax}
+		boxes = append(boxes, newBox)
+		box.yMin = instruction.box.yMin
+	}
+	if instruction.box.yMax >= box.yMin && instruction.box.yMax < box.yMax {
+		newBox := Box{xMin: box.xMin, xMax: box.xMax, yMin: instruction.box.yMax + 1, yMax: box.yMax, zMin: box.zMin, zMax: box.zMax}
+		boxes = append(boxes, newBox)
+		box.yMax = instruction.box.yMax
+	}
+
+	// Cut the extra Z
+	if instruction.box.zMin > box.zMin && instruction.box.zMin <= box.zMax {
+		newBox := Box{xMin: box.xMin, xMax: box.xMax, yMin: box.yMin, yMax: box.yMax, zMin: box.zMin, zMax: instruction.box.zMin - 1}
+		boxes = append(boxes, newBox)
+		box.zMin = instruction.box.zMin
+	}
+	if instruction.box.zMax >= box.zMin && instruction.box.zMax < box.zMax {
+		newBox := Box{xMin: box.xMin, xMax: box.xMax, yMin: box.yMin, yMax: box.yMax, zMin: instruction.box.zMax + 1, zMax: box.zMax}
+		boxes = append(boxes, newBox)
+		box.zMax = instruction.box.zMax
+	}
 
 	return boxes
 }
 
 func executeInstruction(boxesON []Box, instruction Instruction) []Box {
 	newBoxesON := []Box{}
-
+	// Check each existing box if they are affected by the instruction.
 	for i := 0; i < len(boxesON); i++ {
-		if !(intersect(instruction.box, boxesON[i])) {
-			newBoxesON = append(newBoxesON, instruction.box)
-		} else {
-			newBoxesON = append(newBoxesON, generateNewBoxes(instruction.box, boxesON[i], instruction.action)...)
+		// If the box is entirely inside the instruction box, nothing needs to be done
+		// for that box, since the instructionx box will be already added/removed.
+		if !containBox(boxesON[i], instruction.box) {
+			// If the box intersects, updates the list of boxes with the new broken down
+			// boxes that don't intersect with the instruction box.
+			if intersect(boxesON[i], instruction.box) {
+				newBoxesON = append(newBoxesON, generateNewBoxes(boxesON[i], instruction)...)
+			} else {
+				newBoxesON = append(newBoxesON, boxesON[i])
+			}
 		}
+	}
+	// After all boxes are checked, add the instruction box if it's type "on"
+	if instruction.action == "on" {
+		newBoxesON = append(newBoxesON, instruction.box)
 	}
 
 	return newBoxesON
@@ -138,9 +162,9 @@ func executeInstruction(boxesON []Box, instruction Instruction) []Box {
 func totalCubes(boxes []Box) int {
 	count := 0
 	for i := 0; i < len(boxes); i++ {
-		count += abs(boxes[i].xMax-boxes[i].xMin+1) *
-			abs(boxes[i].yMax-boxes[i].yMin+1) *
-			abs(boxes[i].zMax-boxes[i].zMin+1)
+		count += (abs(boxes[i].xMax-boxes[i].xMin) + 1) *
+			(abs(boxes[i].yMax-boxes[i].yMin) + 1) *
+			(abs(boxes[i].zMax-boxes[i].zMin) + 1)
 	}
 	return count
 }
@@ -151,11 +175,7 @@ func main() {
 
 	for i := 1; i < len(instructions); i++ {
 		boxesON = executeInstruction(boxesON, instructions[i])
-		// fmt.Printf("Cubes ON on Reactor After %+v: %d\n", instructions[i], totalCubes(boxesON))
 	}
 
 	fmt.Printf("Cubes ON on Reactor: %d\n", totalCubes(boxesON))
 }
-
-// 2,758,514,936,282,235
-// 1,227,345,351,869,476
